@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  api_server:
+    build:
+      context: ./astar_api/api_server
+    ports:
+      - "3939:3939"
+    depends_on:
+      - astar_algorithm
+
+  astar_algorithm:
+    build:
+      context: ./astar_api/astar_algorithm
