@@ -1,14 +1,12 @@
 version: '3'
 
 services:
-  api_server:
+  backend:
     build:
-      context: ./astar_api/api_server
+      context: ./backend
     ports:
-      - "3939:3939"
-    depends_on:
-      - astar_algorithm
+      - "8080:8080"
 
-  astar_algorithm:
+  astar:
     build:
-      context: ./astar_api/astar_algorithm
+      context: ./astar
