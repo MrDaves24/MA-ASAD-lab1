@@ -1,0 +1,8 @@
+- [ ] Map update : Add 3 icons (wall, cross, number)
+  - (Default one clicked)
+  - On click, border
+  - On click on grid, wall places wall, cross cleans wall n weight, number asks for weight
+- [ ] Ajouter les + en bas gauche et en haut droite
+- [ ] Ajouter les moins en bas à et droite
+- [ ] Call API
+- [ ] const : Set URL to /... when served from server ?
