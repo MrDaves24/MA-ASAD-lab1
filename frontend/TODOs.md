@@ -6,3 +6,4 @@
 - [ ] Ajouter les moins en bas à et droite
 - [ ] Call API
 - [ ] const : Set URL to /... when served from server ?
+- [ ] Save preferences in local storage
