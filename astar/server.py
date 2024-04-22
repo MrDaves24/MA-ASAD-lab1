@@ -2,11 +2,11 @@ from flask import Flask, request, jsonify
 from astar import search
 
 app = Flask(__name__)
-error = jsonify({'error': 'An error occurred while running the algorithm.'}), 500
 
 
 @app.route('/', methods=['POST'])
 def a_star():
+    error = jsonify({'error': 'An error occurred while running the algorithm.'}), 500
     data = request.get_json(silent=True)
     if data is None:
         return error
