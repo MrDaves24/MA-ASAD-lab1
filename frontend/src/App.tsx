@@ -3,7 +3,7 @@ import './App.css'
 import {callapi, range} from './helpers'
 import {Action, Config} from './types'
 
-import {useEffect, useState} from 'react'
+import {useEffect, useMemo, useState} from 'react'
 import {DndContext, DragEndEvent, useDraggable, useDroppable} from '@dnd-kit/core'
 
 function Draggable(props: {id: string, className?: string, children: string}) {
@@ -168,14 +168,16 @@ export default function App() {
         })
     }
 
-    const {max, min} = Array.from(weights.values()).reduce((acc, val) => {
-        if (val === 'w') return acc
+    const {max, min} = useMemo(() => {
+        return Array.from(weights.values()).reduce((acc, val) => {
+            if (val === 'w') return acc
 
-        if (val > acc.max) acc.max = val
-        if (val < acc.min) acc.min = val
+            if (val > acc.max) acc.max = val
+            if (val < acc.min) acc.min = val
 
-        return acc
-    }, {min: config.default_weight, max: config.default_weight})
+            return acc
+        }, {min: config.default_weight, max: config.default_weight})
+    }, [config, weights])
 
     return (<div id="body">
         <h1>A*</h1>
