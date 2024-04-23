@@ -202,6 +202,8 @@ export default function App() {
 }
 
 function color(ratio: number): string {
+    if (isNaN(ratio)) ratio = 0.1
+
     const from = [33, 60, 255]
     const to = [255, 50, 0]
 
@@ -209,5 +211,5 @@ function color(ratio: number): string {
     const g = Math.round(from[1] + (to[1] - from[1]) * ratio)
     const b = Math.round(from[2] + (to[2] - from[2]) * ratio)
 
-    return `rgba(${r}, ${g}, ${b}, ${ratio})`
+    return `rgba(${r}, ${g}, ${b}, ${Math.max(0.1, ratio)})`
 }
