@@ -79,7 +79,7 @@ export default function App() {
             if (action === Action.Weight) {
                 const weight = window.prompt("Enter weight", "1")
                 if (weight === null) return
-                const value = parseInt(weight ?? "0")
+                value = parseInt(weight ?? "0")
                 if (isNaN(value)) return
                 if (value < 1) return
             }
