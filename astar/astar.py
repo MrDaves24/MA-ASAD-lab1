@@ -3,7 +3,8 @@ from heapq import heappush, heappop
 
 def search(config, weights, start, stop):
     def inside(node):
-        return 0 <= node[0] < config["width"] and 0 <= node[1] < config["height"]
+        node = node.split('-')
+        return 0 <= int(node[0]) < config["width"] and 0 <= int(node[1]) < config["height"]
 
     if not inside(start) or not inside(stop):
         print("start or stop is outside of grid :(")
@@ -24,22 +25,28 @@ def search(config, weights, start, stop):
         return weights[node] if node in weights else config["default_weight"]
 
     def neighbors(node):
-        x, y = node
-        return [(nx, ny) for nx, ny in
-                [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1),
-                 (x - 1, y - 1), (x + 1, y + 1), (x + 1, y - 1), (x - 1, y + 1)]
-                if inside((nx, ny))]
+        node = node.split('-')
+        x = int(node[0])
+        y = int(node[1])
+
+        candidates = [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1), (x - 1, y - 1), (x + 1, y + 1), (x + 1, y - 1), (x - 1, y + 1)]
+
+        for candidate in candidates:
+            if candidate[0] < 0 or candidate[1] < 0:
+                continue
+            candidate = f"{candidate[0]}-{candidate[1]}"
+            if not inside(candidate):
+                continue
+            yield candidate
 
     while True:
         try:
             current_cost, current_node = heappop(frontier)
-            # print(f"Evaluate {current_node}")
         except:
             print("AStar : out of node in heap")
             return None
 
         if current_node == stop:
-            # print("Reached end")
             break
 
         # print(f"Neighbors: {neighbors(current_node)}")
@@ -67,8 +74,8 @@ def search(config, weights, start, stop):
 
 if __name__ == '__main__':
     config = {"width": 10, "height": 8, "default_weight": 1}
-    weigths = {}
-    start = (0, 0)
-    stop = (9, 7)
+    weigths = {'0-1': 'w', '1-0': 'w', '0-2': 200}
+    start = "0-0"
+    stop = "9-7"
 
     print(search(config, weigths, start, stop))

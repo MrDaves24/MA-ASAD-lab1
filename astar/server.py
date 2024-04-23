@@ -12,13 +12,14 @@ def a_star():
         return error
 
     config = data.get("config")  # { start: [x, y], stop: [x, y], height, width, default_weight }
-    weights = data.get("weights")  # {x,y: weight}
+    weights = data.get("weights")  # [['x-y', weight], ...]
+    weights = {w[0]: w[1] for w in weights}
 
     if config is None or weights is None:
         return error
 
     try:
-        result = search(config, weights, config.start, config.stop)
+        result = search(config, weights, config["start"], config["stop"])
     except:
         result = None
 
