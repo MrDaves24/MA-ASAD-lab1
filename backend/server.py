@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
 from requests import post
@@ -17,6 +17,16 @@ def a_star():
         return jsonify(result), 200
     except:
         return jsonify({'error': 'An error occurred while running the algorithm.'}), 500
+
+
+@app.route('/', methods=['GET'])
+def index():
+    return send_from_directory('/app/static', 'index.html')
+
+
+@app.route('/assets/<path:path>', methods=['GET'])
+def assets(path):
+    return send_from_directory('/app/static/assets', path)
 
 
 if __name__ == '__main__':
