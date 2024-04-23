@@ -6,11 +6,15 @@ import {fetcher as fett} from 'itty-fetcher'
 const fetcher = fett({base: API})
 
 export async function callapi(weights: Map<string, Weight>, config: Config) : Promise<Map<string, "←"|"↑"|"↓"|"→"|"↖"|"↗"|"↘"|"↙"> | undefined> {
-    const w: (string[] | {error: string}) = await fetcher.post('/a_star', {config, weights: [...weights.entries()]})
+    const w: string[] | {error: string} = await fetcher.post('/a_star', {config, weights: [...weights.entries()]})
+
+    // @ts-expect-error : TS doesn't understand that w is a string[] or {error: string}
     if (w.error !== undefined) {
-        console.log(w.error)
+        // @ts-expect-error : again
+        console.warn(w.error)
         return undefined
     }
+    // @ts-expect-error : again
     const path: Position[] = w.map(Position.fromString)
 
     const res = new Map()
