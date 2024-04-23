@@ -13,7 +13,7 @@ def a_star():
     data = request.get_json()
 
     try:
-        result = post(astar, data)
+        result = post(astar, json=data).json()
         return jsonify(result), 200
     except:
         return jsonify({'error': 'An error occurred while running the algorithm.'}), 500
