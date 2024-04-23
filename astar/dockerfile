@@ -7,4 +7,5 @@ WORKDIR /app
 COPY server.py .
 COPY astar.py .
 
+EXPOSE 8080
 CMD ["python", "server.py"]
