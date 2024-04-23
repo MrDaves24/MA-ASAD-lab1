@@ -151,12 +151,12 @@ export default function App() {
                 <tbody>
                 {range(config.height).map((y: number) => (<tr key={`line-${y}`}>
                     {range(config.width).map((x: number) => {
+                        const key = `${x}-${y}`
                         if (config.start[0] === x && config.start[1] === y) {
-                            return (<Draggable key={`${x}-${y}`} className="start" id="start">⚑</Draggable>)
+                            return (<Draggable key={key} className="start" id="start">⚑</Draggable>)
                         } else if (config.stop[0] === x && config.stop[1] === y) {
-                            return (<Draggable key={`${x}-${y}`} className="stop" id="stop">⚑</Draggable>)
+                            return (<Draggable key={key} className="stop" id="stop">⚑</Draggable>)
                         } else {
-                            const key = `${x}-${y}`
                             let content: string | undefined;
                             const className: string[] = []
                             let weight: number;
