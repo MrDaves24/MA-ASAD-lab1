@@ -1,8 +1,11 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
+
 from requests import post
 
 app = Flask(__name__)
 astar = "http://astar:8080/"
+CORS(app)
 
 
 @app.route('/a_star', methods=['POST'])
