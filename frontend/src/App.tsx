@@ -191,7 +191,7 @@ export default function App() {
 
             return acc
         }, {min: config.default_weight, max: config.default_weight})
-    }, [config, weights])
+    }, [config.default_weight, weights])
 
     return (<div id="body">
         <h1>A*</h1>
