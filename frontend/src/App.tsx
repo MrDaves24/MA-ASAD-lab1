@@ -43,7 +43,10 @@ export default function App() {
     const [action, setAction] = useState<Action>(Action.Wall)
 
     useEffect(() => {
-        callapi(weights, config).then(grid => setGrid(() => grid))
+        callapi(weights, config).then(grid => {
+            if (grid === undefined) setGrid(() => new Map())
+            else setGrid(() => grid)
+        })
     }, [config, weights])
 
     // Dev fake config
