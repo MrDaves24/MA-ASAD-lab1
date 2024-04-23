@@ -144,28 +144,45 @@ export default function App() {
     }
 
     const remove_column = () => {
-        // TODO : Update weights
-        setConfig(config => {
-            config.width -= 1
+        const new_width = config.width - 1
+        return () => {
+            setWeights(weights => {
+                const res = new Map(weights)
+                for (let y = 0; y < config.height; y++) {
+                    res.delete(`${new_width}-${y}`)
+                }
+                return res
+            })
+            setConfig(config => {
+                config.width = new_width
 
-            if (config.start[0] == config.width) config.start[0] -= 1
-            if (config.stop[0] == config.width) config.stop[0] -= 1
+                if (config.start[0] == config.width) config.start[0] -= 1
+                if (config.stop[0] == config.width) config.stop[0] -= 1
 
-            return {...config}
-        })
-
+                return {...config}
+            })
+        }
     }
 
     const remove_line = () => {
-        // TODO : Update weigths
-        setConfig(config => {
-            config.height -= 1
+        const new_height = config.height - 1
+        return () => {
+            setWeights(weights => {
+                const res = new Map(weights)
+                for (let x = 0; x < config.width; x++) {
+                    res.delete(`${x}-${new_height}`)
+                }
+                return res
+            })
+            setConfig(config => {
+                config.height = new_height
 
-            if (config.start[1] === config.height) config.start[1] -= 1
-            if (config.stop[1] === config.height) config.stop[1] -= 1
+                if (config.start[1] === config.height) config.start[1] -= 1
+                if (config.stop[1] === config.height) config.stop[1] -= 1
 
-            return {...config}
-        })
+                return {...config}
+            })
+        }
     }
 
     const {max, min} = useMemo(() => {
@@ -187,9 +204,9 @@ export default function App() {
         <br/>
 
         Line : <button onClick={add_line}>+</button>&nbsp;
-        <button disabled={!can_reduce(config.height - 1, config.width)} onClick={remove_line}>-</button><br/>
+        <button disabled={!can_reduce(config.height - 1, config.width)} onClick={remove_line()}>-</button><br/>
         Column : <button onClick={add_column}>+</button>&nbsp;
-        <button disabled={!can_reduce(config.height, config.width - 1)} onClick={remove_column}>-</button><br/>
+        <button disabled={!can_reduce(config.height, config.width - 1)} onClick={remove_column()}>-</button><br/>
         <br/>
         <div className="icons">
             <span id="icon-wall" className={action === Action.Wall ? 'active' : ''} onClick={() => setAction(() => Action.Wall)}>⧚⧚</span>
