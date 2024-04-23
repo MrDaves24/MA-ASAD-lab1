@@ -92,34 +92,32 @@ export default function App() {
         })
     }
 
-    const handle_click = (x: number, y: number) => {
+    const handle_click = (pos: string) => {
         return () => {
+            let value: number | undefined;
             if (action === Action.Weight) {
                 const weight = window.prompt("Enter weight", "1")
                 if (weight === null) return
-                const value = parseInt(weight)
+                const value = parseInt(weight ?? "0")
                 if (isNaN(value)) return
                 if (value < 1) return
-                setWeights(weights => {
-                    const res = new Map(weights)
-                    res.set(`${x}-${y}`, value)
-                    return res
-                })
-            } else if (action === Action.Wall) {
-                setWeights(weights => {
-                    const res = new Map(weights)
-                    res.set(`${x}-${y}`, 'w')
-                    return res
-                })
-            } else if (action === Action.Clear) {
-                setWeights(weights => {
-                    const res = new Map(weights)
-                    res.delete(`${x}-${y}`)
-                    return res
-                })
-            } else {
-                throw "Shouldn't happen"
             }
+
+            setWeights(weights => {
+                const res = new Map(weights)
+
+                if (action === Action.Weight) {
+                    res.set(pos, value ?? 1)
+                } else if (action === Action.Wall) {
+                    res.set(pos, 'w')
+                } else if (action === Action.Clear) {
+                    res.delete(pos)
+                } else {
+                    return weights
+                }
+
+                return res
+            })
         }
     }
 
