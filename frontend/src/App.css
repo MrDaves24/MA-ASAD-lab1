@@ -29,3 +29,14 @@ td {
 .stop {
     color: orangered;
 }
+
+.icons * {
+    width: 40px;
+    height: 40px;
+    font-size: 30px;
+    padding: 3px;
+}
+
+.icons .active {
+    border:1px green solid;
+}

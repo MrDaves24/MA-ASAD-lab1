@@ -5,3 +5,9 @@ export type Config = {
     width: number,
     default_weight: number
 }
+
+export enum Action {
+    Wall,
+    Weight,
+    Clear,
+}
