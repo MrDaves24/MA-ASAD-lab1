@@ -119,7 +119,7 @@ export default function App() {
                     return res
                 })
             } else {
-                throw "wtf ?"
+                throw "Shouldn't happen"
             }
         }
     }
