@@ -1,7 +1,7 @@
 import './App.css'
 
 import {callapi, range} from './helpers'
-import {Action, Config} from './types'
+import {Action, Config, Position, Weight} from './types'
 
 import {useEffect, useMemo, useState} from 'react'
 import {DndContext, DragEndEvent, useDraggable, useDroppable} from '@dnd-kit/core'
@@ -22,7 +22,7 @@ function Draggable(props: {id: string, className?: string, children: string}) {
     );
 }
 
-function Droppable(props: {id: string, className?: string, children?: string, data: [number, number], style?: {backgroundColor: string}, onClick?: () => void}) {
+function Droppable(props: {id: string, className?: string, children?: string, data: Position, style?: {backgroundColor: string}, onClick?: () => void}) {
     const {setNodeRef} = useDroppable({
         id: props.id,
         data: props.data,
@@ -36,8 +36,8 @@ function Droppable(props: {id: string, className?: string, children?: string, da
 }
 
 export default function App() {
-    const [config, setConfig] = useState<Config>({default_weight: 1, height: 10, start: [0, 0], stop: [9, 9], width: 10})
-    const [weights, setWeights] = useState<Map<string, number | 'w'>>(new Map())
+    const [config, setConfig] = useState<Config>({default_weight: 1, height: 10, start: new Position(0, 0), stop: new Position(9,9 ), width: 10})
+    const [weights, setWeights] = useState<Map<string, Weight>>(new Map())
     const [grid, setGrid] = useState<Map<string, string>>(new Map())
     const [ts, setTs] = useState<number>(0)
     const [action, setAction] = useState<Action>(Action.Wall)
@@ -79,16 +79,15 @@ export default function App() {
         if (e.over === null) return
 
         const action = e.active.id as "start" | "stop"
-        const pos = e.over.data.current as [number, number]
+        const pos = e.over.data.current as Position
 
-        if (config.stop[0] === pos[0] && config.stop[1] === pos[1]) return
-        if (config.start[0] === pos[0] && config.start[1] === pos[1]) return
-
+        if (config.stop.equals(pos)) return
+        if (config.start.equals(pos)) return
 
         setConfig(config => ({...config, [action]: pos}))
         setWeights(weights => {
             const res = new Map(weights)
-            res.delete(`${pos[0]}-${pos[1]}`)
+            res.delete(pos.toString())
             return res
         })
     }
@@ -135,10 +134,10 @@ export default function App() {
         if (height === 0 || width === 0) return false
 
         // Don't let start and stop collide
-        if (config.start[0] === width && config.start[0] - 1 === config.stop[0] && config.start[1] === config.stop[1]) return false
-        if (config.start[1] === height && config.start[0] === config.stop[0] && config.start[1] - 1 === config.stop[1]) return false
-        if (config.stop[0] === width && config.stop[0] - 1 === config.start[0] && config.stop[1] === config.start[1]) return false
-        if (config.stop[1] === height && config.stop[0] === config.start[0] && config.stop[1] - 1 === config.start[1]) return false
+        if (config.start.x === width && new Position(config.start.x - 1, config.start.y).equals(config.stop)) return false
+        if (config.start.y === height && new Position(config.start.x, config.start.y - 1).equals(config.stop)) return false
+        if (config.stop.x === width && new Position(config.stop.x - 1, config.stop.y).equals(config.start)) return false
+        if (config.stop.y === height && new Position(config.stop.x, config.stop.y - 1).equals(config.start)) return false
 
         return true
     }
@@ -149,15 +148,15 @@ export default function App() {
             setWeights(weights => {
                 const res = new Map(weights)
                 for (let y = 0; y < config.height; y++) {
-                    res.delete(`${new_width}-${y}`)
+                    res.delete(new Position(new_width, y).toString())
                 }
                 return res
             })
             setConfig(config => {
                 config.width = new_width
 
-                if (config.start[0] == config.width) config.start[0] -= 1
-                if (config.stop[0] == config.width) config.stop[0] -= 1
+                if (config.start.x == config.width) config.start = new Position(config.start.x - 1, config.start.y)
+                if (config.stop.x == config.width) config.stop = new Position(config.stop.x - 1, config.stop.y)
 
                 return {...config}
             })
@@ -170,15 +169,15 @@ export default function App() {
             setWeights(weights => {
                 const res = new Map(weights)
                 for (let x = 0; x < config.width; x++) {
-                    res.delete(`${x}-${new_height}`)
+                    res.delete(new Position(x, new_height).toString())
                 }
                 return res
             })
             setConfig(config => {
                 config.height = new_height
 
-                if (config.start[1] === config.height) config.start[1] -= 1
-                if (config.stop[1] === config.height) config.stop[1] -= 1
+                if (config.start.y === config.height) config.start = new Position(config.start.x, config.start.y - 1)
+                if (config.stop.y === config.height) config.stop = new Position(config.stop.x, config.stop.y - 1)
 
                 return {...config}
             })
@@ -219,10 +218,10 @@ export default function App() {
                 <tbody>
                 {range(config.height).map((y: number) => (<tr key={`line-${y}`}>
                     {range(config.width).map((x: number) => {
-                        const key = `${x}-${y}`
-                        if (config.start[0] === x && config.start[1] === y) {
+                        const key = new Position(x, y).toString()
+                        if (config.start.x === x && config.start.y === y) {
                             return (<Draggable key={key} className="start" id="start">⚑</Draggable>)
-                        } else if (config.stop[0] === x && config.stop[1] === y) {
+                        } else if (config.stop.x === x && config.stop.y === y) {
                             return (<Draggable key={key} className="stop" id="stop">⚑</Draggable>)
                         } else {
                             let content: string | undefined;
@@ -251,9 +250,9 @@ export default function App() {
                             }
 
                             return (<Droppable
-                                onClick={handle_click(x, y)}
+                                onClick={handle_click(key)}
                                 style={style}
-                                data={[x, y]}
+                                data={new Position(x, y)}
                                 id={`cell-${key}`}
                                 key={`cell-${key}`}
                                 className={className.join(" ")}
