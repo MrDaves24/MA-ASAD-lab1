@@ -36,6 +36,21 @@ export class Position {
     public get y() : number {
         return this._y
     }
+    public directionTo(other: Position) : "←"|"↑"|"↓"|"→"|"↖"|"↗"|"↘"|"↙" {
+        if (this._x === other._x) {
+            if (this._y === other._y) {
+                throw new Error('Positions are the same')
+            }
+            return this._y < other._y ? '↓' : '↑'
+        }
+        if (this._y === other._y) {
+            return this._x < other._x ? '→' : '←'
+        }
+        if (this._x < other._x) {
+            return this._y < other._y ? '↘' : '↗'
+        }
+        return this._y < other._y ? '↙' : '↖'
+    }
 
     public toJSON() : string {
         return this.toString()
