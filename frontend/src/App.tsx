@@ -134,8 +134,11 @@ export default function App() {
     const can_reduce = (height: number, width: number) : boolean => {
         if (height === 0 || width === 0) return false
 
-        if (config.start[0] === width || config.stop[0] === width) return false
-        if (config.start[1] === height || config.stop[1] === height) return false
+        // Don't let start and stop collide
+        if (config.start[0] === width && config.start[0] - 1 === config.stop[0] && config.start[1] === config.stop[1]) return false
+        if (config.start[1] === height && config.start[0] === config.stop[0] && config.start[1] - 1 === config.stop[1]) return false
+        if (config.stop[0] === width && config.stop[0] - 1 === config.start[0] && config.stop[1] === config.start[1]) return false
+        if (config.stop[1] === height && config.stop[0] === config.start[0] && config.stop[1] - 1 === config.start[1]) return false
 
         return true
     }
