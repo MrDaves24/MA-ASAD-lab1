@@ -49,28 +49,6 @@ export default function App() {
         })
     }, [config, weights])
 
-    // Dev fake config
-    useEffect(() => {
-        setGrid(() => {
-            const res = new Map()
-
-            res.set("1-1", "↘")
-            res.set("2-2", "↘")
-
-            return res
-        })
-
-        setWeights(() => {
-            const res = new Map()
-
-            res.set("0-1", "w")
-            res.set("1-0", "w")
-            res.set("0-2", 200)
-
-            return res
-        })
-    }, [])
-
     const handle_default_weight = (default_weight: number) => {
         if (isNaN(default_weight)) return
         clearTimeout(ts)
