@@ -222,7 +222,7 @@ export default function App() {
                                 weight = w
                             }
 
-                            const ratio = (weight - min) / (max - min)
+                            const ratio = (weight === min || max === min) ? 0 : (weight - min) / (max - min)
 
                             const style = {
                                 backgroundColor: color(ratio),
