@@ -124,6 +124,47 @@ export default function App() {
         }
     }
 
+    const add_column = () => {
+        setConfig(config => ({...config, width: config.width + 1}))
+    }
+    const add_line = () => {
+        setConfig(config => ({...config, height: config.height + 1}))
+    }
+
+    const can_reduce = (height: number, width: number) : boolean => {
+        if (height === 0 || width === 0) return false
+
+        if (config.start[0] === width || config.stop[0] === width) return false
+        if (config.start[1] === height || config.stop[1] === height) return false
+
+        return true
+    }
+
+    const remove_column = () => {
+        // TODO : Update weights
+        setConfig(config => {
+            config.width -= 1
+
+            if (config.start[0] == config.width) config.start[0] -= 1
+            if (config.stop[0] == config.width) config.stop[0] -= 1
+
+            return {...config}
+        })
+
+    }
+
+    const remove_line = () => {
+        // TODO : Update weigths
+        setConfig(config => {
+            config.height -= 1
+
+            if (config.start[1] === config.height) config.start[1] -= 1
+            if (config.stop[1] === config.height) config.stop[1] -= 1
+
+            return {...config}
+        })
+    }
+
     const {max, min} = Array.from(weights.values()).reduce((acc, val) => {
         if (val === 'w') return acc
 
@@ -140,6 +181,11 @@ export default function App() {
         <br/>
         <br/>
 
+        Line : <button onClick={add_line}>+</button>&nbsp;
+        <button disabled={!can_reduce(config.height - 1, config.width)} onClick={remove_line}>-</button><br/>
+        Column : <button onClick={add_column}>+</button>&nbsp;
+        <button disabled={!can_reduce(config.height, config.width - 1)} onClick={remove_column}>-</button><br/>
+        <br/>
         <div className="icons">
             <span id="icon-wall" className={action === Action.Wall ? 'active' : ''} onClick={() => setAction(() => Action.Wall)}>⧚⧚</span>
             <span id="icon-wall" className={action === Action.Weight ? 'active' : ''} onClick={() => setAction(() => Action.Weight)}>123</span>
