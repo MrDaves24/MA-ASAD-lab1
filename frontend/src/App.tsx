@@ -1,39 +1,13 @@
-import './App.css'
+import './style/App.css'
 
-import {callapi, range} from './helpers'
-import {Action, Config, Position, Weight} from './types'
+import {callapi, can_reduce, range} from './helpers/helpers'
+import {Action, Config, Position, Weight} from './helpers/types'
+
+import {Draggable, Droppable} from './kit/Dnd'
+import {color} from './kit/Color'
 
 import {useEffect, useMemo, useState} from 'react'
-import {DndContext, DragEndEvent, useDraggable, useDroppable} from '@dnd-kit/core'
-
-function Draggable(props: {id: string, className?: string, children: string}) {
-    const {attributes, listeners, setNodeRef, transform} = useDraggable({
-        id: props.id,
-    });
-    const style = transform ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-    } : undefined;
-
-
-    return (
-        <td ref={setNodeRef} style={style} className={(props.className ?? "") + " draggable"} {...listeners} {...attributes}>
-            {props.children}
-        </td>
-    );
-}
-
-function Droppable(props: {id: string, className?: string, children?: string, data: Position, style?: {backgroundColor: string}, onClick?: () => void}) {
-    const {setNodeRef} = useDroppable({
-        id: props.id,
-        data: props.data,
-    });
-
-    return (
-        <td style={props.style} className={props.className} ref={setNodeRef} onClick={props.onClick}>
-            {props.children}
-        </td>
-    );
-}
+import {DndContext, DragEndEvent} from '@dnd-kit/core'
 
 export default function App() {
     const [config, setConfig] = useState<Config>({default_weight: 1, height: 10, start: new Position(0, 0), stop: new Position(9,9 ), width: 10})
@@ -109,18 +83,6 @@ export default function App() {
         setConfig(config => ({...config, height: config.height + 1}))
     }
 
-    const can_reduce = (height: number, width: number) : boolean => {
-        if (height === 0 || width === 0) return false
-
-        // Don't let start and stop collide
-        if (config.start.x === width && new Position(config.start.x - 1, config.start.y).equals(config.stop)) return false
-        if (config.start.y === height && new Position(config.start.x, config.start.y - 1).equals(config.stop)) return false
-        if (config.stop.x === width && new Position(config.stop.x - 1, config.stop.y).equals(config.start)) return false
-        if (config.stop.y === height && new Position(config.stop.x, config.stop.y - 1).equals(config.start)) return false
-
-        return true
-    }
-
     const remove_column = () => {
         const new_width = config.width - 1
         return () => {
@@ -176,16 +138,24 @@ export default function App() {
 
     return (<div id="body">
         <h1>A*</h1>
-        <label>Default weight : <input min={1} step={1} type="number" defaultValue={config.default_weight} onChange={e => handle_default_weight(e.target.valueAsNumber)} /></label>
+        <label>Default weight : <input
+            min={1}
+            step={1}
+            type="number"
+            defaultValue={config.default_weight}
+            onChange={e => handle_default_weight(e.target.valueAsNumber)}
+        /></label>
 
         <br/>
         <br/>
 
         Line : <button onClick={add_line}>+</button>&nbsp;
-        <button disabled={!can_reduce(config.height - 1, config.width)} onClick={remove_line()}>-</button><br/>
+        <button disabled={!can_reduce(config, config.height - 1, config.width)} onClick={remove_line()}>-</button><br/>
+
         Column : <button onClick={add_column}>+</button>&nbsp;
-        <button disabled={!can_reduce(config.height, config.width - 1)} onClick={remove_column()}>-</button><br/>
+        <button disabled={!can_reduce(config, config.height, config.width - 1)} onClick={remove_column()}>-</button><br/>
         <br/>
+
         <div className="icons">
             <span id="icon-wall" className={action === Action.Wall ? 'active' : ''} onClick={() => setAction(() => Action.Wall)}>⧚⧚</span>
             <span id="icon-wall" className={action === Action.Weight ? 'active' : ''} onClick={() => setAction(() => Action.Weight)}>123</span>
@@ -247,15 +217,3 @@ export default function App() {
     </div>)
 }
 
-function color(ratio: number): string {
-    if (isNaN(ratio)) ratio = 0.1
-
-    const from = [33, 60, 255]
-    const to = [255, 50, 0]
-
-    const r = Math.round(from[0] + (to[0] - from[0]) * ratio)
-    const g = Math.round(from[1] + (to[1] - from[1]) * ratio)
-    const b = Math.round(from[2] + (to[2] - from[2]) * ratio)
-
-    return `rgba(${r}, ${g}, ${b}, ${Math.max(0.1, ratio)})`
-}
