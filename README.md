@@ -1,7 +1,11 @@
-# Algo service layer
+# Path finding web service
 
-Ici c'est le layer algo diviser en container. Il y a une plus value 1 au niveau consomation on appel les services d'algo que quand on en a besoin et en plus l'API avec Flask c'est plustôt léger aussi. Example de post qui fonctionne : 
+This is a simple web service that provides a path finding algorithm. The algorithm is A* and the web service is implemented using Flask.
 
-``curl -X POST http://localhost:3939/shortest_path -H "Content-Type: application/json" -d '{"graph": [[1,1,1,1],[1,0,1,1],[1,1,1,1],[1,1,1,1]], "start": [0,0], "goal": [3,3]}'``
+To start the web service with docker, run the following command:
 
-![Component diagram](./astarservice.png)
+# Run with docker
+```bash
+docker compose up -d
+```
+This will start the two webservices and you will be able to access the service on [http://localhost:8080](http://localhost:8080).
