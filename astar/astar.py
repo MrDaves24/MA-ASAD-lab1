@@ -1,7 +1,7 @@
 from heapq import heappush, heappop
+from heuristics import *
 
-
-def search(config, weights, start, stop):
+def search(config, weights, start, stop, h_name):
     def inside(node):
         node = node.split('-')
         return 0 <= int(node[0]) < config["width"] and 0 <= int(node[1]) < config["height"]
@@ -56,7 +56,8 @@ def search(config, weights, start, stop):
             new_cost = current_cost + cost(next_node)
             if next_node not in cost_so_far or new_cost < cost_so_far[next_node]:
                 cost_so_far[next_node] = new_cost
-                heappush(frontier, (new_cost, next_node))
+                priority = new_cost + globals()[h_name](next_node, stop)
+                heappush(frontier, (priority, next_node))
                 came_from[next_node] = current_node
 
     path = []
@@ -78,4 +79,6 @@ if __name__ == '__main__':
     start = "0-0"
     stop = "9-7"
 
-    print(search(config, weigths, start, stop))
+    print(search(config, weigths, start, stop, 'manhattan'))
+    print(search(config, weigths, start, stop, 'euclidean'))
+    print(search(config, weigths, start, stop, 'chebyshev'))
