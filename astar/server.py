@@ -11,6 +11,7 @@ def a_star():
     if data is None:
         return error
 
+    heuristic_name = data.get("heuristic")
     config = data.get("config")  # { start: [x, y], stop: [x, y], height, width, default_weight }
     weights = data.get("weights")  # [['x-y', weight], ...]
     weights = {w[0]: w[1] for w in weights}
@@ -19,7 +20,7 @@ def a_star():
         return error
 
     try:
-        result = search(config, weights, config["start"], config["stop"])
+        result = search(config, weights, config["start"], config["stop"], heuristic_name)
     except:
         result = None
 

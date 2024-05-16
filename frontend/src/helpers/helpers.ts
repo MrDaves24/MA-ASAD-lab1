@@ -1,12 +1,12 @@
-import {API} from './const'
-import {type Config, Position, Weight} from './types'
+import { API } from './const'
+import { type Config, Position, Weight } from './types'
 
-import {fetcher as fett} from 'itty-fetcher'
+import { fetcher as fett } from 'itty-fetcher'
 
-const fetcher = fett({base: API})
+const fetcher = fett({ base: API })
 
-export async function callapi(weights: Map<string, Weight>, config: Config) : Promise<Map<string, "←"|"↑"|"↓"|"→"|"↖"|"↗"|"↘"|"↙"> | undefined> {
-    const w: string[] | {error: string} = await fetcher.post('/a_star', {config, weights: [...weights.entries()]})
+export async function callapi(weights: Map<string, Weight>, config: Config, heuristic: string): Promise<Map<string, "←" | "↑" | "↓" | "→" | "↖" | "↗" | "↘" | "↙"> | undefined> {
+    const w: string[] | { error: string } = await fetcher.post('/a_star', { config, weights: [...weights.entries()], heuristic })
 
     // @ts-expect-error : TS doesn't understand that w is a string[] or {error: string}
     if (w.error !== undefined) {
@@ -25,15 +25,15 @@ export async function callapi(weights: Map<string, Weight>, config: Config) : Pr
     return res
 }
 
-export function range(from: number, to?: number) : Array<number> {
+export function range(from: number, to?: number): Array<number> {
     if (to === undefined) {
         to = from
         from = 0
     }
-    return Array.from({length: to - from}, (_, i) => i + from)
+    return Array.from({ length: to - from }, (_, i) => i + from)
 }
 
-export function can_reduce(config: { start: Position, stop: Position }, new_height: number, new_width: number) : boolean{
+export function can_reduce(config: { start: Position, stop: Position }, new_height: number, new_width: number): boolean {
     if (new_height === 0 || new_width === 0) return false
 
     // Don't let start and stop collide
