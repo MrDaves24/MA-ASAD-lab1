@@ -1,32 +1,33 @@
 import './style/App.css'
 
-import {callapi, can_reduce, range} from './helpers/helpers'
-import {Action, Config, Position, Weight} from './helpers/types'
+import { callapi, can_reduce, range } from './helpers/helpers'
+import { Action, Config, Position, Weight } from './helpers/types'
 
-import {Draggable, Droppable} from './kit/Dnd'
-import {color} from './kit/Color'
+import { Draggable, Droppable } from './kit/Dnd'
+import { color } from './kit/Color'
 
-import {useEffect, useMemo, useState} from 'react'
-import {DndContext, DragEndEvent} from '@dnd-kit/core'
+import { useEffect, useMemo, useState } from 'react'
+import { DndContext, DragEndEvent } from '@dnd-kit/core'
 
 export default function App() {
-    const [config, setConfig] = useState<Config>({default_weight: 1, height: 10, start: new Position(0, 0), stop: new Position(9,9 ), width: 10})
+    const [config, setConfig] = useState<Config>({ default_weight: 1, height: 10, start: new Position(0, 0), stop: new Position(9, 9), width: 10 })
     const [weights, setWeights] = useState<Map<string, Weight>>(new Map())
+    const [heuristic, setHeuristic] = useState<string>('euclidean')
     const [grid, setGrid] = useState<Map<string, string>>(new Map())
     const [ts, setTs] = useState<number>(0)
     const [action, setAction] = useState<Action>(Action.Wall)
 
     useEffect(() => {
-        callapi(weights, config).then(grid => {
+        callapi(weights, config, heuristic).then(grid => {
             if (grid === undefined) setGrid(() => new Map())
             else setGrid(() => grid)
         })
-    }, [config, weights])
+    }, [config, weights, heuristic])
 
     const handle_default_weight = (default_weight: number) => {
         if (isNaN(default_weight)) return
         clearTimeout(ts)
-        const new_ts = setTimeout(() => setConfig((prev) => ({...prev, default_weight})), 500)
+        const new_ts = setTimeout(() => setConfig((prev) => ({ ...prev, default_weight })), 500)
         setTs(() => new_ts)
     }
 
@@ -39,7 +40,7 @@ export default function App() {
         if (config.stop.equals(pos)) return
         if (config.start.equals(pos)) return
 
-        setConfig(config => ({...config, [action]: pos}))
+        setConfig(config => ({ ...config, [action]: pos }))
         setWeights(weights => {
             const res = new Map(weights)
             res.delete(pos.toString())
@@ -77,10 +78,10 @@ export default function App() {
     }
 
     const add_column = () => {
-        setConfig(config => ({...config, width: config.width + 1}))
+        setConfig(config => ({ ...config, width: config.width + 1 }))
     }
     const add_line = () => {
-        setConfig(config => ({...config, height: config.height + 1}))
+        setConfig(config => ({ ...config, height: config.height + 1 }))
     }
 
     const remove_column = () => {
@@ -99,7 +100,7 @@ export default function App() {
                 if (config.start.x == config.width) config.start = new Position(config.start.x - 1, config.start.y)
                 if (config.stop.x == config.width) config.stop = new Position(config.stop.x - 1, config.stop.y)
 
-                return {...config}
+                return { ...config }
             })
         }
     }
@@ -120,12 +121,12 @@ export default function App() {
                 if (config.start.y === config.height) config.start = new Position(config.start.x, config.start.y - 1)
                 if (config.stop.y === config.height) config.stop = new Position(config.stop.x, config.stop.y - 1)
 
-                return {...config}
+                return { ...config }
             })
         }
     }
 
-    const {max, min} = useMemo(() => {
+    const { max, min } = useMemo(() => {
         return Array.from(weights.values()).reduce((acc, val) => {
             if (val === 'w') return acc
 
@@ -133,11 +134,31 @@ export default function App() {
             if (val < acc.min) acc.min = val
 
             return acc
-        }, {min: config.default_weight, max: config.default_weight})
+        }, { min: config.default_weight, max: config.default_weight })
     }, [config.default_weight, weights])
+
+    const heuristics = [
+        { value: "euclidean", label: "Euclidean" },
+        { value: "manhattan", label: "Manhattan" },
+        { value: "chebyshev", label: "Chebyshev" },
+    ];
 
     return (<div id="body">
         <h1>A*</h1>
+        <label>Choose heuristic : <select
+            defaultValue={config.default_weight}
+            onChange={e => setHeuristic(e.target.value)}
+        >
+            {heuristics.map((option) => (
+                <option key={option.value} value={option.value}>
+                    {option.label}
+                </option>
+            ))}
+        </select></label>
+
+        <br />
+        <br />
+
         <label>Default weight : <input
             min={1}
             step={1}
@@ -146,15 +167,15 @@ export default function App() {
             onChange={e => handle_default_weight(e.target.valueAsNumber)}
         /></label>
 
-        <br/>
-        <br/>
+        <br />
+        <br />
 
         Line : <button onClick={add_line}>+</button>&nbsp;
-        <button disabled={!can_reduce(config, config.height - 1, config.width)} onClick={remove_line()}>-</button><br/>
+        <button disabled={!can_reduce(config, config.height - 1, config.width)} onClick={remove_line()}>-</button><br />
 
         Column : <button onClick={add_column}>+</button>&nbsp;
-        <button disabled={!can_reduce(config, config.height, config.width - 1)} onClick={remove_column()}>-</button><br/>
-        <br/>
+        <button disabled={!can_reduce(config, config.height, config.width - 1)} onClick={remove_column()}>-</button><br />
+        <br />
 
         <div className="icons">
             <span id="icon-wall" className={action === Action.Wall ? 'active' : ''} onClick={() => setAction(() => Action.Wall)}>⧚⧚</span>
@@ -165,52 +186,52 @@ export default function App() {
         <DndContext onDragEnd={handle_drop}>
             <table>
                 <tbody>
-                {range(config.height).map((y: number) => (<tr key={`line-${y}`}>
-                    {range(config.width).map((x: number) => {
-                        const key = new Position(x, y).toString()
-                        if (config.start.x === x && config.start.y === y) {
-                            return (<Draggable key={key} className="start" id="start">⚑</Draggable>)
-                        } else if (config.stop.x === x && config.stop.y === y) {
-                            return (<Draggable key={key} className="stop" id="stop">⚑</Draggable>)
-                        } else {
-                            let content: string | undefined;
-                            const className: string[] = []
-                            let weight: number;
-
-                            const w = weights.get(key)
-
-                            if (w === 'w') {
-                                content = '⧚⧚'
-                                className.push("wall")
-                            } else if (grid.get(key) !== undefined) {
-                                content = grid.get(key)
-                            }
-
-                            if (w === 'w' || w === undefined) {
-                                weight = config.default_weight
+                    {range(config.height).map((y: number) => (<tr key={`line-${y}`}>
+                        {range(config.width).map((x: number) => {
+                            const key = new Position(x, y).toString()
+                            if (config.start.x === x && config.start.y === y) {
+                                return (<Draggable key={key} className="start" id="start">⚑</Draggable>)
+                            } else if (config.stop.x === x && config.stop.y === y) {
+                                return (<Draggable key={key} className="stop" id="stop">⚑</Draggable>)
                             } else {
-                                weight = w
+                                let content: string | undefined;
+                                const className: string[] = []
+                                let weight: number;
+
+                                const w = weights.get(key)
+
+                                if (w === 'w') {
+                                    content = '⧚⧚'
+                                    className.push("wall")
+                                } else if (grid.get(key) !== undefined) {
+                                    content = grid.get(key)
+                                }
+
+                                if (w === 'w' || w === undefined) {
+                                    weight = config.default_weight
+                                } else {
+                                    weight = w
+                                }
+
+                                const ratio = (weight === min || max === min) ? 0 : (weight - min) / (max - min)
+
+                                const style = {
+                                    backgroundColor: color(ratio),
+                                }
+
+                                return (<Droppable
+                                    onClick={handle_click(key)}
+                                    style={style}
+                                    data={new Position(x, y)}
+                                    id={`cell-${key}`}
+                                    key={`cell-${key}`}
+                                    className={className.join(" ")}
+                                >
+                                    {content}
+                                </Droppable>)
                             }
-
-                            const ratio = (weight === min || max === min) ? 0 : (weight - min) / (max - min)
-
-                            const style = {
-                                backgroundColor: color(ratio),
-                            }
-
-                            return (<Droppable
-                                onClick={handle_click(key)}
-                                style={style}
-                                data={new Position(x, y)}
-                                id={`cell-${key}`}
-                                key={`cell-${key}`}
-                                className={className.join(" ")}
-                            >
-                                {content}
-                            </Droppable>)
-                        }
-                    })}
-                </tr>))}
+                        })}
+                    </tr>))}
                 </tbody>
             </table>
         </DndContext>
