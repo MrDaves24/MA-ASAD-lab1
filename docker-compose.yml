@@ -1,10 +1,63 @@
 services:
+  proxy:
+    image: traefik:3.0
+    restart: unless-stopped
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--ping"
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.https.address=:443"
+      - "--certificatesresolvers.myresolver.acme.keyType=EC256"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=pascal.perrenoud@master.hes-so.ch"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=http"
+      - "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--entrypoints.http.http.redirections.entryPoint.to=https"
+      - "--entrypoints.http.http.redirections.entryPoint.scheme=https"
+    networks:
+      - WAN
+      - LAN
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    healthcheck:
+      test: [ "CMD", "traefik", "healthcheck", "--ping" ]
+      start_period: 10s
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   backend:
     build:
       context: .
-    ports:
-      - "8080:8080"
+    networks:
+      - LAN
+      - WAN
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.backend.entrypoints=https"
+      - "traefik.http.routers.backend.tls=true"
+      - "traefik.http.services.backend.loadbalancer.server.port=8080"
+      - "traefik.http.routers.backend.tls.certresolver=myresolver"
 
   astar:
     build:
       context: ./astar
+    networks:
+      - LAN
+
+volumes:
+  letsencrypt:
+
+networks:
+  LAN:
+    internal: true
+  WAN:
