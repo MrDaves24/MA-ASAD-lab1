@@ -1,9 +1,9 @@
-import { API } from './const'
+import { API, DEV } from './const'
 import { type Config, Position, Weight } from './types'
 
 import { fetcher as fett } from 'itty-fetcher'
 
-const fetcher = fett({ base: API })
+const fetcher = fett(DEV ? { base: API } : {})
 
 export async function callapi(weights: Map<string, Weight>, config: Config, heuristic: string): Promise<Map<string, "←" | "↑" | "↓" | "→" | "↖" | "↗" | "↘" | "↙"> | undefined> {
     const w: string[] | { error: string } = await fetcher.post('/a_star', { config, weights: [...weights.entries()], heuristic })
