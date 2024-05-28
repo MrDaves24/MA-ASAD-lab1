@@ -67,7 +67,9 @@ export default function App() {
                 } else if (action === Action.Wall) {
                     res.set(pos, 'w')
                 } else if (action === Action.Clear) {
-                    res.delete(pos)
+                    res.delete(pos);
+                } else if (action === Action.Intermediary) {
+                    res.set(pos, 'i')
                 } else {
                     return weights
                 }
@@ -128,7 +130,7 @@ export default function App() {
 
     const { max, min } = useMemo(() => {
         return Array.from(weights.values()).reduce((acc, val) => {
-            if (val === 'w') return acc
+            if (val === 'w' || val === 'i') return acc
 
             if (val > acc.max) acc.max = val
             if (val < acc.min) acc.min = val
@@ -180,6 +182,7 @@ export default function App() {
         <div className="icons">
             <span id="icon-wall" className={action === Action.Wall ? 'active' : ''} onClick={() => setAction(() => Action.Wall)}>⧚⧚</span>
             <span id="icon-wall" className={action === Action.Weight ? 'active' : ''} onClick={() => setAction(() => Action.Weight)}>123</span>
+            <span id="icon-intermediary" className={action === Action.Intermediary ? 'active' : ''} onClick={() => setAction(() => Action.Intermediary)}>★</span>
             <span id="icon-clear" className={action === Action.Clear ? 'active' : ''} onClick={() => setAction(() => Action.Clear)}>❌</span>
         </div>
 
@@ -203,11 +206,15 @@ export default function App() {
                                 if (w === 'w') {
                                     content = '⧚⧚'
                                     className.push("wall")
-                                } else if (grid.get(key) !== undefined) {
+                                } else if (w === 'i') {
+                                    content = '★'
+                                    className.push("intermediary")
+                                }
+                                else if (grid.get(key) !== undefined) {
                                     content = grid.get(key)
                                 }
 
-                                if (w === 'w' || w === undefined) {
+                                if (w === 'w' || w === undefined || w === 'i') {
                                     weight = config.default_weight
                                 } else {
                                     weight = w
@@ -235,6 +242,5 @@ export default function App() {
                 </tbody>
             </table>
         </DndContext>
-    </div>)
+    </div >)
 }
-

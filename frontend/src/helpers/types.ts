@@ -9,34 +9,35 @@ export type Config = {
 export enum Action {
     Wall,
     Weight,
+    Intermediary,
     Clear,
 }
 
-export type Weight = number | 'w'
+export type Weight = number | 'w' | 'i'
 
 export class Position {
-    constructor(private readonly _x: number, private readonly _y: number) {}
+    constructor(private readonly _x: number, private readonly _y: number) { }
 
-    public equals(other: Position) : boolean {
+    public equals(other: Position): boolean {
         return this._x === other._x && this._y === other._y
     }
-    public inside(config: Config) : boolean {
+    public inside(config: Config): boolean {
         return this._x >= 0 && this._x < config.width && this._y >= 0 && this._y < config.height
     }
-    toString() : string {
+    toString(): string {
         return `${this._x}-${this._y}`
     }
-    public static fromString(str: string) : Position {
+    public static fromString(str: string): Position {
         const [x, y] = str.split('-').map(Number)
         return new Position(x, y)
     }
-    public get x() : number {
+    public get x(): number {
         return this._x
     }
-    public get y() : number {
+    public get y(): number {
         return this._y
     }
-    public directionTo(other: Position) : "←"|"↑"|"↓"|"→"|"↖"|"↗"|"↘"|"↙" {
+    public directionTo(other: Position): "←" | "↑" | "↓" | "→" | "↖" | "↗" | "↘" | "↙" {
         if (this._x === other._x) {
             if (this._y === other._y) {
                 throw new Error('Positions are the same')
@@ -52,7 +53,7 @@ export class Position {
         return this._y < other._y ? '↙' : '↖'
     }
 
-    public toJSON() : string {
+    public toJSON(): string {
         return this.toString()
     }
 }
