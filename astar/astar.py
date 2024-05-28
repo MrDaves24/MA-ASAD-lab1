@@ -29,7 +29,7 @@ def search(config, weights, start, stop, h_name):
         x = int(node[0])
         y = int(node[1])
 
-        candidates = [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1), (x - 1, y - 1), (x + 1, y + 1), (x + 1, y - 1), (x - 1, y + 1)]
+        candidates = [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
 
         for candidate in candidates:
             if candidate[0] < 0 or candidate[1] < 0:
