@@ -17,11 +17,18 @@ export default function App() {
     const [grid, setGrid] = useState<Map<string, string>>(new Map())
     const [ts, setTs] = useState<number>(0)
     const [action, setAction] = useState<Action>(Action.Wall)
-    const [connectivityIssue, setConnectivityIssue] = useState<boolean>(false);
+    const [_connectivityIssue, setConnectivityIssue] = useState<boolean>(false);
 
     useEffect(() => {
         queueApiCall(weights, config, heuristic, setConnectivityIssue).then(grid => {
             if (grid === undefined) setGrid(() => new Map());
+            else if (grid === "TIMEOUT") {
+                const width = config.width
+                const height = config.height
+
+                for (let i = 0; i < width - 10; ++i) remove_column()
+                for (let i = 0; i < height - 10; ++i) remove_line()
+            }
             else setGrid(() => grid);
         });
     }, [config, weights, heuristic])

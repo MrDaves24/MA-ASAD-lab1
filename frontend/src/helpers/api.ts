@@ -39,18 +39,28 @@ const processQueue = async (setConnectivityIssue: (value: boolean) => void) => {
     processingQueue = false;
 };
 
-export const queueApiCall = (weights: Map<string, Weight>, config: Config, heuristic: string, setConnectivityIssue: (value: boolean) => void): Promise<Map<string, string> | undefined> => {
+export const queueApiCall = (weights: Map<string, Weight>, config: Config, heuristic: string, setConnectivityIssue: (value: boolean) => void): Promise<Map<string, string> | undefined | "TIMEOUT"> => {
     return new Promise((resolve, reject) => {
         apiQueue.push({ weights, config, heuristic, resolve, reject, retries: 0 });
-        processQueue(setConnectivityIssue);
+        return processQueue(setConnectivityIssue);
     });
 };
 
-async function callapi(weights: Map<string, Weight>, config: Config, heuristic: string): Promise<Map<string, "←" | "↑" | "↓" | "→" | "↖" | "↗" | "↘" | "↙"> | undefined> {
+async function callapi(weights: Map<string, Weight>, config: Config, heuristic: string): Promise<Map<string, "←" | "↑" | "↓" | "→" | "↖" | "↗" | "↘" | "↙"> | undefined | "TIMEOUT"> {
     const TIMEOUT_DURATION = 5000; // Timeout duration in milliseconds
+    const start = new Date()
+    let end!: Date;
     const fetchPromise = fetcher.post('/a_star', { config, weights: [...weights.entries()], heuristic });
     // @ts-expect-error : TS doesn't understand that w is a string[] or {error: string}
-    const w: string[] | { error: string } = await Promise.race([fetchPromise, timeout(TIMEOUT_DURATION)]);
+    const w: string[] | { error: string } = await Promise.race([fetchPromise, timeout(TIMEOUT_DURATION)])
+        .finally(() => {
+            end = new Date()
+        });
+
+    if ((end.getTime() - start.getTime()) >= TIMEOUT_DURATION) {
+        return "TIMEOUT"
+    }
+
     // @ts-expect-error : TS doesn't understand that w is a string[] or {error: string}
     if (w.error !== undefined) {
         // @ts-expect-error : again

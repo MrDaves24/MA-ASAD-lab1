@@ -62,7 +62,7 @@ export type ApiRequest = {
     weights: Map<string, Weight>;
     config: Config;
     heuristic: string;
-    resolve: (value: Map<string, string> | undefined) => void;
+    resolve: (value: Map<string, string> | undefined | "TIMEOUT") => void;
     reject: (reason?: any) => void;
     retries: number;
 };
