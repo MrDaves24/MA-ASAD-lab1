@@ -1,7 +1,8 @@
 import './style/App.css'
 
-import { callapi, can_reduce, range } from './helpers/helpers'
+import { can_reduce, range } from './helpers/helpers'
 import { Action, Config, Position, Weight } from './helpers/types'
+import { queueApiCall } from './helpers/api'
 
 import { Draggable, Droppable } from './kit/Dnd'
 import { color } from './kit/Color'
@@ -16,12 +17,13 @@ export default function App() {
     const [grid, setGrid] = useState<Map<string, string>>(new Map())
     const [ts, setTs] = useState<number>(0)
     const [action, setAction] = useState<Action>(Action.Wall)
+    const [connectivityIssue, setConnectivityIssue] = useState<boolean>(false);
 
     useEffect(() => {
-        callapi(weights, config, heuristic).then(grid => {
-            if (grid === undefined) setGrid(() => new Map())
-            else setGrid(() => grid)
-        })
+        queueApiCall(weights, config, heuristic, setConnectivityIssue).then(grid => {
+            if (grid === undefined) setGrid(() => new Map());
+            else setGrid(() => grid);
+        });
     }, [config, weights, heuristic])
 
     const handle_default_weight = (default_weight: number) => {
@@ -242,5 +244,5 @@ export default function App() {
                 </tbody>
             </table>
         </DndContext>
-    </div >)
+    </div>)
 }

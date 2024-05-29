@@ -6,6 +6,7 @@ body {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    font-family: Arial, sans-serif;
 }
 
 table {
@@ -39,4 +40,26 @@ td {
 
 .icons .active {
     border:1px green solid;
+}
+
+.connectivity-popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px;
+    background-color: #ff4d4d;
+    color: white; 
+    z-index: 1000;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

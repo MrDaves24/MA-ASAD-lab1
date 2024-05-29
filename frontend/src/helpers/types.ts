@@ -57,3 +57,12 @@ export class Position {
         return this.toString()
     }
 }
+
+export type ApiRequest = {
+    weights: Map<string, Weight>;
+    config: Config;
+    heuristic: string;
+    resolve: (value: Map<string, string> | undefined) => void;
+    reject: (reason?: any) => void;
+    retries: number;
+};
